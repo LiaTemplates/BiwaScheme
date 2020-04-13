@@ -1,7 +1,7 @@
 <!--
 author:   André Dietrich
 email:    LiaScript@web.de
-version:  0.0.1
+version:  0.0.3
 language: en
 narrator: UK English Male
 logo:     https://raw.githubusercontent.com/biwascheme/biwascheme/master/website/images/biwascheme_logo.png
@@ -13,8 +13,8 @@ comment:  Template for integrating the
 attribute: [BiwaScheme](https://github.com/biwascheme/biwascheme) is released by
   Yutaka HARA (yhara) yutaka.hara.gmail.com http://twitter.com/yhara_en
 
-script:   https://www.biwascheme.org/release/biwascheme-0.7.0-min.js
 
+script:   https://www.biwascheme.org/release/biwascheme-0.7.0-min.js
 
 @BiwaScheme.eval
 <script>
@@ -24,7 +24,7 @@ Console.puts = function(str, x){ console.debug(str) }
 
 var biwa = new BiwaScheme.Interpreter(console.error)
 biwa.evaluate(`@input`, function(result) {
-  if (result != "#<undef>") {
+  if (result && result != "#<undef>") {
     console.debug(result)
   }
 });
@@ -43,7 +43,7 @@ var biwa = new BiwaScheme.Interpreter(console.error)
 
 setTimeout(function() {
   biwa.evaluate(`@input`, function(result) {
-    if (result != "#<undef>") {
+    if (result && result != "#<undef>") {
       console.debug(result)
     }
   });
@@ -52,7 +52,7 @@ setTimeout(function() {
 send.handle("input", input => {
   try{
     biwa.evaluate(input, function(result) {
-      if (result != "#<undef>") {
+      if (result && result != "#<undef>") {
         console.debug(result)
       }
     })
@@ -70,6 +70,7 @@ send.handle("stop", e => { console.log("execution stopped") })
 -->
 
 # BiwaScheme - Template
+
 
 
                          --{{0}}--
@@ -111,7 +112,16 @@ To use the [BiwaScheme](https://www.biwascheme.org) interpreter, simply add the
 macros `@BiwaScheme.eval` to the end of your scheme snippet.
 
 ``` scheme
-(print (+ 33 34 45))
+(define (fizzbuzz x y)
+  (print
+    (cond (( = (mod x 15) 0 ) "FizzBuzz")
+          (( = (mod x 3) 0 ) "Fizz")
+          (( = (mod x 5) 0 ) "Buzz")
+          (else x)))
+
+    (if (< x y) (fizzbuzz (+ x 1) y)))
+
+(fizzbuzz 1 10)
 ```
 @BiwaScheme.eval
 
@@ -128,10 +138,17 @@ https://www.biwascheme.org/doc/reference.html
                          --{{0}}--
 Use the `@BiwaScheme.evalWithTerminal` macro, if you want to enable interactive
 programming. This opens a terminal after the programm execution that allows to
-execute scheme code.
+execute scheme code. Add for example your `fizzbuzz` command with different parameters.
 
 ``` scheme
-(print (+ 33 34 45))
+(define (fizzbuzz x y)
+  (print
+    (cond (( = (mod x 15) 0 ) "FizzBuzz")
+          (( = (mod x 3) 0 ) "Fizz")
+          (( = (mod x 5) 0 ) "Buzz")
+          (else x)))
+
+    (if (< x y) (fizzbuzz (+ x 1) y)))
 ```
 @BiwaScheme.evalWithTerminal
 
@@ -152,7 +169,7 @@ Console.puts = function(str, x){ console.debug(str) }
 
 var biwa = new BiwaScheme.Interpreter(console.error)
 biwa.evaluate(`@input`, function(result) {
-  if (result != "#<undef>") {
+  if (result && result != "#<undef>") {
     console.debug(result)
   }
 });
@@ -171,7 +188,7 @@ var biwa = new BiwaScheme.Interpreter(console.error)
 
 setTimeout(function() {
   biwa.evaluate(`@input`, function(result) {
-    if (result != "#<undef>") {
+    if (result && result != "#<undef>") {
       console.debug(result)
     }
   });
@@ -180,7 +197,7 @@ setTimeout(function() {
 send.handle("input", input => {
   try{
     biwa.evaluate(input, function(result) {
-      if (result != "#<undef>") {
+      if (result && result != "#<undef>") {
         console.debug(result)
       }
     })
