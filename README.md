@@ -1,7 +1,7 @@
 <!--
 author:   André Dietrich
 email:    LiaScript@web.de
-version:  0.0.3
+version:  0.0.4
 language: en
 narrator: UK English Male
 logo:     https://raw.githubusercontent.com/biwascheme/biwascheme/master/website/images/biwascheme_logo.png
@@ -98,7 +98,7 @@ and change it, as you wish.
   {{1}}
 1. Load the macros via
 
-   `import: https://github.com/liaTemplates/BiwaScheme/README.md`
+   `import: https://raw.githubusercontent.com/liaTemplates/BiwaScheme/master/README.md`
 
 2. Copy the definitions into your Project
 
