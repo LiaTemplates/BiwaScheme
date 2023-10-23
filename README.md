@@ -1,7 +1,7 @@
 <!--
 author:   André Dietrich
 email:    LiaScript@web.de
-version:  0.0.4
+version:  0.0.5
 language: en
 narrator: UK English Male
 logo:     https://raw.githubusercontent.com/biwascheme/biwascheme/master/website/images/biwascheme_logo.png
@@ -14,13 +14,13 @@ attribute: [BiwaScheme](https://github.com/biwascheme/biwascheme) is released by
   Yutaka HARA (yhara) yutaka.hara.gmail.com http://twitter.com/yhara_en
 
 
-script:   https://www.biwascheme.org/release/biwascheme-0.7.0-min.js
+script:   ./biwascheme-0.8.0-min.js
 
 @BiwaScheme.eval
 <script>
-window.console = console
+// window.console = console
 
-Console.puts = function(str, x){ console.debug(str) }
+BiwaScheme.Console.puts = function(str, x){ console.stream(str + (x ? '\n' : '')) }
 
 var biwa = new BiwaScheme.Interpreter(console.error)
 biwa.evaluate(`@input`, function(result) {
@@ -35,9 +35,9 @@ biwa.evaluate(`@input`, function(result) {
 
 @BiwaScheme.evalWithTerminal
 <script>
-window.console = console
+// window.console = console
 
-Console.puts = function(str, x){ console.debug(str) }
+BiwaScheme.Console.puts = function(str, x){ console.stream(str + (x ? '\n' : '')) }
 
 var biwa = new BiwaScheme.Interpreter(console.error)
 
@@ -159,13 +159,11 @@ The code shows how the macros were implemented by using a minified version of
 the BiwaScheme JavaScript interpreter.
 
 ``` html
-script:   https://www.biwascheme.org/release/biwascheme-0.7.0-min.js
+script:   ./biwascheme-0.8.0-min.js
 
 @BiwaScheme.eval
 <script>
-window.console = console
-
-Console.puts = function(str, x){ console.debug(str) }
+BiwaScheme.Console.puts = function(str, x){ console.stream(str + (x ? '\n' : '')) }
 
 var biwa = new BiwaScheme.Interpreter(console.error)
 biwa.evaluate(`@input`, function(result) {
@@ -180,9 +178,7 @@ biwa.evaluate(`@input`, function(result) {
 
 @BiwaScheme.evalWithTerminal
 <script>
-window.console = console
-
-Console.puts = function(str, x){ console.debug(str) }
+BiwaScheme.Console.puts = function(str, x){ console.stream(str + (x ? '\n' : '')) }
 
 var biwa = new BiwaScheme.Interpreter(console.error)
 
@@ -212,6 +208,7 @@ send.handle("stop", e => { console.log("execution stopped") })
 </script>
 
 @end
+
 ```
 
 
