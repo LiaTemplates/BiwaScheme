@@ -14,7 +14,7 @@ attribute: [BiwaScheme](https://github.com/biwascheme/biwascheme) is released by
   Yutaka HARA (yhara) yutaka.hara.gmail.com http://twitter.com/yhara_en
 
 
-script:   https://www.biwascheme.org/release/biwascheme-0.8.3-min.js
+script:   https://www.biwascheme.org/release/biwascheme-0.8.0-min.js
 
 @BiwaScheme.eval
 <script>
