@@ -1,0 +1,28 @@
+{
+  "name": "lia-biwascheme",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LiaScript template for the BiwaScheme interpreter",
+  "app": "dist/index.js",
+  "targets": {
+    "app": {
+      "context": "browser",
+      "outputFormat": "global",
+      "sourceMap": false
+    }
+  },
+  "scripts": {
+    "build": "parcel build src/index.js --no-cache"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiaTemplates/BiwaScheme.git"
+  },
+  "author": "André Dietrich <LiaScript@web.de>",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "biwascheme": "0.8.3",
+    "jquery": "^3.7.1",
+    "parcel": "^2.16.4"
+  }
+}
