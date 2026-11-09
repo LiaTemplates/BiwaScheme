@@ -1,7 +1,7 @@
 <!--
 author:   André Dietrich
 email:    LiaScript@web.de
-version:  0.1.0
+version:  0.2.0
 language: en
 narrator: UK English Male
 logo:     https://raw.githubusercontent.com/biwascheme/biwascheme/master/website/images/biwascheme_logo.png
@@ -49,7 +49,7 @@ always contains the latest fixes and features.
 
 __Pinned version (recommended):__
 
-`import: https://raw.githubusercontent.com/LiaTemplates/BiwaScheme/0.1.0/README.md`
+`import: https://raw.githubusercontent.com/LiaTemplates/BiwaScheme/0.2.0/README.md`
 
 __Latest version:__
 
@@ -63,7 +63,8 @@ __Latest version:__
                          --{{0}}--
 Add the macro `@BiwaScheme.eval` directly below a Scheme code block. The block
 becomes editable and gets a run button. Everything the program prints appears
-in the console below, followed by the value of the last expression.
+in the console below, together with the value of every top-level expression,
+as a Scheme prompt shows it. Definitions and unspecified values are not shown.
 
 ``` scheme
 (define (fizzbuzz x y)

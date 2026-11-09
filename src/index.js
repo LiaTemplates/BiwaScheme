@@ -105,6 +105,51 @@ for (const name of ['resume', 'invoke_closure']) {
   }
 }
 
+// Splits a program into its top-level forms (a datum with its quote prefixes).
+function topLevelForms(code) {
+  const forms = []
+  const n = code.length
+  let i = 0
+  const ws = (k) => code.charCodeAt(k) <= 32
+  const eol = () => { while (i < n && code[i] !== '\n') i++ }
+
+  while (i < n) {
+    if (ws(i)) { i++; continue }
+    if (code[i] === ';') { eol(); continue }
+    const start = i
+    while ("'`,@".includes(code[i]) && i < n) i++
+    if (code[i] === '(') {
+      let depth = 0
+      while (i < n) {
+        const c = code[i]
+        if (c === '"') { i++; while (i < n && code[i] !== '"') i += code[i] === '\\' ? 2 : 1 }
+        else if (c === ';') { eol(); continue }
+        else if (c === '#' && code[i + 1] === '\\') i += 2
+        else if (c === '(') depth++
+        else if (c === ')') { depth--; if (depth === 0) { i++; break } }
+        i++
+      }
+    } else {
+      if (code[i] === '#' && code[i + 1] === '\\') i += 3
+      while (i < n && !ws(i) && code[i] !== '(' && code[i] !== ')') i++
+    }
+    if (i === start) i++
+    forms.push(code.slice(start, i))
+  }
+  return forms
+}
+
+// Shows the value of every top-level expression, as a Scheme prompt does:
+// each form except the last and the definitions writes its value, unless it
+// is unspecified. The last value is shown by Session.done.
+function showEveryValue(code) {
+  const forms = topLevelForms(code)
+  return forms.map((f, k) => {
+    if (k === forms.length - 1 || f.startsWith('(define')) return f
+    return '(let ((%v ' + f + ')) (if (not (or (eq? %v (if #f #f)) (eq? %v (for-each car (list))))) (begin (write %v) (newline))))'
+  }).join('\n')
+}
+
 window.BiwaLia = {
   // Runs a program once. The program starts after the script has returned
   // "LIA: wait", because LiaScript clears the console at that moment.
@@ -112,7 +157,7 @@ window.BiwaLia = {
     const session = new Session(console, false)
     session.onFinish = () => send.lia('LIA: stop')
 
-    setTimeout(() => session.evaluate(code), 0)
+    setTimeout(() => session.evaluate(showEveryValue(code)), 0)
     return 'LIA: wait'
   },
 
@@ -137,7 +182,7 @@ window.BiwaLia = {
     })
 
     // let the terminal open before the first output arrives
-    setTimeout(() => session.evaluate(code), 0)
+    setTimeout(() => session.evaluate(showEveryValue(code)), 0)
     return 'LIA: terminal'
   },
 }
