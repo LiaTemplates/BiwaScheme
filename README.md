@@ -1,7 +1,7 @@
 <!--
 author:   André Dietrich
 email:    LiaScript@web.de
-version:  0.2.0
+version:  0.2.1
 language: en
 narrator: UK English Male
 logo:     https://raw.githubusercontent.com/biwascheme/biwascheme/master/website/images/biwascheme_logo.png
@@ -19,6 +19,8 @@ attribute: [jQuery](https://jquery.com) by the OpenJS Foundation is licensed
 script:   dist/index.js
 
 @BiwaScheme.eval: <script>BiwaLia.eval(`@'input`, console, send)</script>
+
+@BiwaScheme.evalQuiet: <script>BiwaLia.eval(`@'input`, console, send, true)</script>
 
 @BiwaScheme.evalWithTerminal: <script>BiwaLia.terminal(`@'input`, console, send)</script>
 -->
@@ -49,7 +51,7 @@ always contains the latest fixes and features.
 
 __Pinned version (recommended):__
 
-`import: https://raw.githubusercontent.com/LiaTemplates/BiwaScheme/0.2.0/README.md`
+`import: https://raw.githubusercontent.com/LiaTemplates/BiwaScheme/0.2.1/README.md`
 
 __Latest version:__
 
@@ -64,7 +66,8 @@ __Latest version:__
 Add the macro `@BiwaScheme.eval` directly below a Scheme code block. The block
 becomes editable and gets a run button. Everything the program prints appears
 in the console below, together with the value of every top-level expression,
-as a Scheme prompt shows it. Definitions and unspecified values are not shown.
+as a Scheme prompt shows it. A definition is answered with `;Value: name`, as
+MIT Scheme does; unspecified values are not shown.
 
 ``` scheme
 (define (fizzbuzz x y)
@@ -99,6 +102,40 @@ BiwaScheme website.
 
                            {{2}}
 https://www.biwascheme.org/doc/reference.html
+
+                         --{{3}}--
+A long block of definitions answers every one of them. Use
+`@BiwaScheme.evalQuiet` for such a block: it runs in the same way, but leaves
+out the `;Value:` lines, so only the values of the expressions remain.
+
+                           {{3}}
+``` scheme
+(define (square x) (* x x))
+(define (cube x) (* x x x))
+
+(list (square 3) (cube 3))
+```
+@BiwaScheme.evalQuiet
+
+
+## HTML in the console
+
+                         --{{0}}--
+`(display-html string)` shows a piece of HTML in the console of the running
+block: a table, colored text or a picture. Together with `js-eval`, a program
+can draw on a canvas and show the result as an image.
+
+``` scheme
+(display-html "<b>bold</b> and <span style='color: tomato'>colored</span>")
+
+(define (bar n)
+  (display-html
+   (string-append "<div style='background: teal; height: 1em; width: "
+                  (number->string (* 20 n)) "px'></div>")))
+
+(for-each bar '(1 3 5 2))
+```
+@BiwaScheme.eval
 
 
 ## Errors and asynchronous code
@@ -183,6 +220,8 @@ functions, into the file `dist/index.js`.
 script:   dist/index.js
 
 @BiwaScheme.eval: <script>BiwaLia.eval(`@'input`, console, send)</script>
+
+@BiwaScheme.evalQuiet: <script>BiwaLia.eval(`@'input`, console, send, true)</script>
 
 @BiwaScheme.evalWithTerminal: <script>BiwaLia.terminal(`@'input`, console, send)</script>
 ```

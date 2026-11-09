@@ -7,7 +7,10 @@
 import './jquery-global.js'
 import BiwaScheme from 'biwascheme'
 
-const { Interpreter, Port, undef, to_write } = BiwaScheme
+const { Interpreter, Port, undef, to_write, to_display, define_libfunc } = BiwaScheme
+
+// The session whose code runs right now (see activate).
+let current = null
 
 class Session {
   constructor(console, terminal) {
@@ -17,8 +20,9 @@ class Session {
     this.stopped = false
     this.reader = null // pending (read-line) callback
     this.onFinish = null
+    this.newline = false // a printed newline that is held back
 
-    this.output = new Port.CustomOutput((str) => console.stream(str))
+    this.output = new Port.CustomOutput((str) => this.write(str))
     this.input = new Port.CustomInput((callback) => {
       if (!this.terminal) {
         throw new Error('read-line: needs a terminal, use @BiwaScheme.evalWithTerminal')
@@ -33,7 +37,24 @@ class Session {
     this.interpreter = new Interpreter(onError)
   }
 
+  // Printed text. A trailing newline is held back: before more text it is
+  // printed, before a line of its own (a value, HTML, an error) it is dropped,
+  // because that line starts on a new line anyway.
+  write(str) {
+    if (this.newline) str = '\n' + str
+    this.newline = str.endsWith('\n')
+    if (this.newline) str = str.slice(0, -1)
+    if (str) this.console.stream(str)
+  }
+
+  // A line of its own: 'debug' for values, 'html' for HTML, 'error'.
+  line(kind, text) {
+    this.newline = false
+    this.console[kind](text)
+  }
+
   activate() {
+    current = this
     Port.current_output = this.output
     Port.current_error = this.output
     Port.current_input = this.input
@@ -51,14 +72,17 @@ class Session {
   }
 
   done(result) {
-    if (result !== undef && result !== undefined) {
-      this.console.debug(to_write(result))
-    }
+    this.value(result)
     this.finish()
   }
 
+  // Shows a value as a Scheme prompt does; unspecified values stay silent.
+  value(v) {
+    if (v !== undef && v !== undefined) this.line('debug', to_write(v))
+  }
+
   error(e) {
-    this.console.error(e && e.message ? e.message : String(e))
+    this.line('error', e && e.message ? e.message : String(e))
     this.reader = null
     this.finish()
   }
@@ -139,25 +163,42 @@ function topLevelForms(code) {
   return forms
 }
 
-// Shows the value of every top-level expression, as a Scheme prompt does:
-// each form except the last and the definitions writes its value, unless it
-// is unspecified. The last value is shown by Session.done.
-function showEveryValue(code) {
+// The name a top-level (define …) defines, or null for other forms
+// (define-macro, define-record-type, …).
+function definedName(form) {
+  const m = form.match(/^\(define[\s(]+([^\s()]+)/)
+  return m && /^\(define[\s(]/.test(form) ? m[1] : null
+}
+
+// Shows the value of every top-level expression, as a Scheme prompt does, and
+// answers a definition with ";Value: name", as MIT Scheme does. Unspecified
+// values stay silent. The last value is shown by Session.done. With quiet set,
+// definitions are not answered (for long blocks of definitions).
+function showEveryValue(code, quiet) {
   const forms = topLevelForms(code)
   return forms.map((f, k) => {
+    const name = definedName(f)
+    if (name && quiet) return f
+    if (name) return f + '\n(%lia-note ' + JSON.stringify(';Value: ' + name) + ')'
     if (k === forms.length - 1 || f.startsWith('(define')) return f
-    return '(let ((%v ' + f + ')) (if (not (or (eq? %v (if #f #f)) (eq? %v (for-each car (list))))) (begin (write %v) (newline))))'
+    return '(%lia-value ' + f + ')'
   }).join('\n')
 }
+
+// Scheme procedures that write into the terminal of the running code block.
+define_libfunc('%lia-value', 1, 1, (ar) => { if (current) current.value(ar[0]); return undef })
+define_libfunc('%lia-note', 1, 1, (ar) => { if (current) current.line('debug', to_display(ar[0])); return undef })
+define_libfunc('display-html', 1, 1, (ar) => { if (current) current.line('html', to_display(ar[0])); return undef })
 
 window.BiwaLia = {
   // Runs a program once. The program starts after the script has returned
   // "LIA: wait", because LiaScript clears the console at that moment.
-  eval(code, console, send) {
+  // With quiet set, definitions are not answered with ";Value: name".
+  eval(code, console, send, quiet) {
     const session = new Session(console, false)
     session.onFinish = () => send.lia('LIA: stop')
 
-    setTimeout(() => session.evaluate(showEveryValue(code)), 0)
+    setTimeout(() => session.evaluate(showEveryValue(code, quiet)), 0)
     return 'LIA: wait'
   },
 
@@ -173,7 +214,7 @@ window.BiwaLia = {
       } else if (session.running) {
         console.warn('still running, input ignored')
       } else {
-        session.evaluate(line)
+        session.evaluate(showEveryValue(line))
       }
     })
     send.handle('stop', () => {
